@@ -23,11 +23,14 @@
 #include "compositor/meta-compositor-native.h"
 
 #include "backends/meta-logical-monitor.h"
+#include "backends/native/meta-renderer-native.h"
 #include "compositor/meta-surface-actor-wayland.h"
 
 struct _MetaCompositorNative
 {
   MetaCompositorServer parent;
+
+  GList *vrr_logical_monitors;
 };
 
 G_DEFINE_TYPE (MetaCompositorNative, meta_compositor_native,
@@ -115,15 +118,92 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
   clutter_stage_view_assign_next_scanout (CLUTTER_STAGE_VIEW (view), scanout);
 }
 
+void
+meta_compositor_native_request_vrr_for_logical_monitor (MetaCompositorNative *compositor_native,
+                                                        MetaLogicalMonitor   *logical_monitor)
+{
+  compositor_native->vrr_logical_monitors =
+    g_list_append (compositor_native->vrr_logical_monitors, logical_monitor);
+}
+
+static void
+queue_mode_set_for_logical_monitor (MetaLogicalMonitor *logical_monitor)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaRenderer *renderer = meta_backend_get_renderer (backend);
+  MetaRectangle logical_monitor_layout;
+  GList *l;
+
+  logical_monitor_layout = meta_logical_monitor_get_layout (logical_monitor);
+
+  for (l = meta_renderer_get_views (renderer); l; l = l->next)
+    {
+      MetaRendererView *view = l->data;
+      MetaRectangle view_layout;
+
+      clutter_stage_view_get_layout (CLUTTER_STAGE_VIEW (view), &view_layout);
+
+      if (meta_rectangle_overlap (&logical_monitor_layout, &view_layout))
+          meta_renderer_native_view_queue_mode_set (view);
+    }
+}
+
+static void
+request_vrr_mode_for_logical_monitor (MetaLogicalMonitor *logical_monitor,
+                                      gboolean            vrr_requested)
+{
+  GList *l;
+  gboolean vrr_mode_changed = FALSE;
+
+  for (l = meta_logical_monitor_get_monitors (logical_monitor); l; l = l->next)
+    {
+      MetaMonitor *monitor = l->data;
+
+      if (vrr_requested != meta_monitor_is_vrr_requested (monitor))
+        {
+          meta_monitor_set_vrr_requested (monitor, vrr_requested);
+          vrr_mode_changed = TRUE;
+        }
+    }
+
+  if (vrr_mode_changed)
+    queue_mode_set_for_logical_monitor (logical_monitor);
+}
+
+static void
+request_vrr_mode_for_logical_monitors (MetaCompositorNative *compositor_native)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);;
+  GList *l;
+
+  for (l = meta_monitor_manager_get_logical_monitors (monitor_manager); l; l = l->next)
+    {
+      MetaLogicalMonitor *logical_monitor = l->data;
+
+      if (g_list_find (compositor_native->vrr_logical_monitors,
+                       logical_monitor))
+        request_vrr_mode_for_logical_monitor (logical_monitor, TRUE);
+      else
+        request_vrr_mode_for_logical_monitor (logical_monitor, FALSE);
+    }
+
+  g_clear_pointer (&compositor_native->vrr_logical_monitors, g_list_free);
+}
+
 static void
 meta_compositor_native_pre_paint (MetaCompositor *compositor)
 {
+  MetaCompositorNative *compositor_native = META_COMPOSITOR_NATIVE (compositor);
   MetaCompositorClass *parent_class;
 
   maybe_assign_primary_plane (compositor);
 
   parent_class = META_COMPOSITOR_CLASS (meta_compositor_native_parent_class);
   parent_class->pre_paint (compositor);
+
+  request_vrr_mode_for_logical_monitors (compositor_native);
 }
 
 MetaCompositorNative *
@@ -140,9 +220,22 @@ meta_compositor_native_init (MetaCompositorNative *compositor_native)
 }
 
 static void
+meta_compositor_native_dispose (GObject *object)
+{
+  MetaCompositorNative *compositor_native = META_COMPOSITOR_NATIVE (object);
+
+  g_clear_pointer (&compositor_native->vrr_logical_monitors, g_list_free);
+
+  G_OBJECT_CLASS (meta_compositor_native_parent_class)->dispose (object);
+}
+
+static void
 meta_compositor_native_class_init (MetaCompositorNativeClass *klass)
 {
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
   MetaCompositorClass *compositor_class = META_COMPOSITOR_CLASS (klass);
+
+  object_class->dispose = meta_compositor_native_dispose;
 
   compositor_class->pre_paint = meta_compositor_native_pre_paint;
 }

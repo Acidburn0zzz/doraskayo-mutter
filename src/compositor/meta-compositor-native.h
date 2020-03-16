@@ -27,6 +27,9 @@
 G_DECLARE_FINAL_TYPE (MetaCompositorNative, meta_compositor_native,
                       META, COMPOSITOR_NATIVE, MetaCompositor)
 
+void meta_compositor_native_request_vrr_for_logical_monitor (MetaCompositorNative *compositor_native,
+                                                             MetaLogicalMonitor   *logical_monitor);
+
 MetaCompositorNative * meta_compositor_native_new (MetaDisplay *display);
 
 #endif /* META_COMPOSITOR_NATIVE_H */

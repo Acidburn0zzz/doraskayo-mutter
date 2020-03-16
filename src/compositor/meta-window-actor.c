@@ -41,6 +41,11 @@
 #include "wayland/meta-wayland-surface.h"
 #endif
 
+#ifdef HAVE_NATIVE_BACKEND
+#include "backends/native/meta-backend-native.h"
+#include "compositor/meta-compositor-native.h"
+#endif
+
 typedef enum
 {
   INITIALLY_FROZEN,
@@ -1006,6 +1011,48 @@ meta_window_actor_sync_visibility (MetaWindowActor *self)
     }
 }
 
+#ifdef HAVE_NATIVE_BACKEND
+static void
+meta_window_actor_maybe_request_vrr (MetaWindowActor *window_actor)
+{
+  MetaWindowActorPrivate *priv =
+    meta_window_actor_get_instance_private (window_actor);
+  MetaCompositor *compositor = priv->compositor;
+  MetaCompositorNative *compositor_native = META_COMPOSITOR_NATIVE (compositor);
+  MetaWindow *window;
+  MetaLogicalMonitor *logical_monitor;
+
+  if (meta_compositor_is_unredirect_inhibited (compositor))
+    return;
+
+  if (meta_window_actor_effect_in_progress (window_actor))
+    return;
+
+  if (clutter_actor_has_transitions (CLUTTER_ACTOR (window_actor)))
+    return;
+
+  window = meta_window_actor_get_meta_window (window_actor);
+  if (!window)
+    return;
+
+  if (!meta_window_vrr_requested (window))
+    return;
+
+  if (!meta_window_should_be_showing (window))
+    return;
+
+  if (!meta_window_is_logical_monitor_sized (window))
+    return;
+
+  logical_monitor = meta_window_get_main_logical_monitor (window);
+  if (!logical_monitor)
+    return;
+
+  meta_compositor_native_request_vrr_for_logical_monitor (compositor_native,
+                                                          logical_monitor);
+}
+#endif /* HAVE_NATIVE_BACKEND */
+
 void
 meta_window_actor_pre_paint (MetaWindowActor *self)
 {
@@ -1013,6 +1060,11 @@ meta_window_actor_pre_paint (MetaWindowActor *self)
     return;
 
   META_WINDOW_ACTOR_GET_CLASS (self)->pre_paint (self);
+
+#ifdef HAVE_NATIVE_BACKEND
+  if (META_IS_BACKEND_NATIVE (meta_get_backend ()))
+    meta_window_actor_maybe_request_vrr (self);
+#endif
 }
 
 void
