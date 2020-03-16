@@ -1793,6 +1793,19 @@ reload_window_opacity (MetaWindow    *window,
   meta_window_set_opacity (window, opacity);
 }
 
+static void
+reload_vrr_requested (MetaWindow    *window,
+                      MetaPropValue *value,
+                      gboolean       initial)
+{
+  gboolean vrr_requested = FALSE;
+
+  if (value->type != META_PROP_VALUE_INVALID)
+    vrr_requested = (guint32) value->v.cardinal;
+
+  meta_window_set_vrr_requested (window, vrr_requested);
+}
+
 #define RELOAD_STRING(var_name, propname) \
   static void                                       \
   reload_ ## var_name (MetaWindow    *window,       \
@@ -1889,6 +1902,7 @@ meta_x11_display_init_window_prop_hooks (MetaX11Display *x11_display)
     { x11_display->atom__NET_WM_STRUT_PARTIAL, META_PROP_VALUE_INVALID, reload_struts, NONE },
     { x11_display->atom__NET_WM_BYPASS_COMPOSITOR, META_PROP_VALUE_CARDINAL,  reload_bypass_compositor, LOAD_INIT | INCLUDE_OR },
     { x11_display->atom__NET_WM_WINDOW_OPACITY, META_PROP_VALUE_CARDINAL, reload_window_opacity, LOAD_INIT | INCLUDE_OR },
+    { x11_display->atom__VARIABLE_REFRESH, META_PROP_VALUE_CARDINAL, reload_vrr_requested, LOAD_INIT },
     { 0 },
   };
 
