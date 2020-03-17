@@ -127,6 +127,18 @@ META_EXPORT_TEST
 gboolean meta_monitor_is_underscanning (MetaMonitor *monitor);
 
 META_EXPORT_TEST
+gboolean meta_monitor_is_vrr_capable (MetaMonitor *monitor);
+
+META_EXPORT_TEST
+gboolean meta_monitor_is_vrr_enabled (MetaMonitor *monitor);
+
+META_EXPORT_TEST
+gboolean meta_monitor_is_vrr_requested (MetaMonitor *monitor);
+
+META_EXPORT_TEST
+void meta_monitor_set_vrr_requested (MetaMonitor *monitor, gboolean vrr_requested);
+
+META_EXPORT_TEST
 gboolean meta_monitor_is_laptop_panel (MetaMonitor *monitor);
 
 META_EXPORT_TEST

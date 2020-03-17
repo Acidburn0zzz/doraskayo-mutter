@@ -340,6 +340,47 @@ meta_monitor_is_underscanning (MetaMonitor *monitor)
 }
 
 gboolean
+meta_monitor_is_vrr_enabled (MetaMonitor *monitor)
+{
+  MetaOutput *output;
+
+  output = meta_monitor_get_main_output (monitor);
+
+  return output->vrr_enabled;
+}
+
+gboolean
+meta_monitor_is_vrr_capable (MetaMonitor *monitor)
+{
+  MetaOutput *output;
+
+  output = meta_monitor_get_main_output (monitor);
+
+  return output->vrr_capable;
+}
+
+gboolean
+meta_monitor_is_vrr_requested (MetaMonitor *monitor)
+{
+  MetaOutput *output;
+
+  output = meta_monitor_get_main_output (monitor);
+
+  return output->vrr_requested;
+}
+
+void
+meta_monitor_set_vrr_requested (MetaMonitor *monitor,
+                                gboolean     vrr_requested)
+{
+  MetaOutput *output;
+
+  output = meta_monitor_get_main_output (monitor);
+
+  output->vrr_requested = vrr_requested;
+}
+
+gboolean
 meta_monitor_is_laptop_panel (MetaMonitor *monitor)
 {
   MetaOutput *output;
