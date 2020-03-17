@@ -160,6 +160,7 @@ typedef enum
   STATE_MONITOR_MODE_RATE,
   STATE_MONITOR_MODE_FLAG,
   STATE_MONITOR_UNDERSCANNING,
+  STATE_MONITOR_ENABLE_VRR,
   STATE_DISABLED,
 } ParserState;
 
@@ -382,6 +383,10 @@ handle_start_element (GMarkupParseContext  *context,
           {
             parser->state = STATE_MONITOR_UNDERSCANNING;
           }
+	else if (g_str_equal (element_name, "enable-vrr"))
+          {
+            parser->state = STATE_MONITOR_ENABLE_VRR;
+          }
         else
           {
             g_set_error (error, G_MARKUP_ERROR, G_MARKUP_ERROR_UNKNOWN_ELEMENT,
@@ -472,6 +477,13 @@ handle_start_element (GMarkupParseContext  *context,
       {
         g_set_error (error, G_MARKUP_ERROR, G_MARKUP_ERROR_UNKNOWN_ELEMENT,
                      "Invalid element '%s' under underscanning", element_name);
+        return;
+      }
+
+    case STATE_MONITOR_ENABLE_VRR:
+      {
+        g_set_error (error, G_MARKUP_ERROR, G_MARKUP_ERROR_UNKNOWN_ELEMENT,
+                     "Invalid element '%s' under enable-vrr", element_name);
         return;
       }
 
@@ -671,6 +683,14 @@ handle_end_element (GMarkupParseContext  *context,
     case STATE_MONITOR_UNDERSCANNING:
       {
         g_assert (g_str_equal (element_name, "underscanning"));
+
+        parser->state = STATE_MONITOR;
+        return;
+      }
+
+    case STATE_MONITOR_ENABLE_VRR:
+      {
+        g_assert (g_str_equal (element_name, "enable-vrr"));
 
         parser->state = STATE_MONITOR;
         return;
@@ -1072,6 +1092,14 @@ handle_text (GMarkupParseContext *context,
                    error);
         return;
       }
+
+    case STATE_MONITOR_ENABLE_VRR:
+      {
+        read_bool (text, text_len,
+                   &parser->current_monitor_config->enable_vrr,
+                   error);
+        return;
+      }
     }
 }
 
@@ -1182,6 +1210,8 @@ append_monitors (GString *buffer,
       g_string_append (buffer, "        </mode>\n");
       if (monitor_config->enable_underscanning)
         g_string_append (buffer, "        <underscanning>yes</underscanning>\n");
+      if (monitor_config->enable_vrr)
+        g_string_append (buffer, "        <enable-vrr>yes</enable-vrr>\n");
       g_string_append (buffer, "      </monitor>\n");
     }
 }

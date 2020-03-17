@@ -34,6 +34,7 @@ typedef struct _MetaMonitorConfig
   MetaMonitorSpec *monitor_spec;
   MetaMonitorModeSpec *mode_spec;
   gboolean enable_underscanning;
+  gboolean enable_vrr;
 } MetaMonitorConfig;
 
 typedef struct _MetaLogicalMonitorConfig

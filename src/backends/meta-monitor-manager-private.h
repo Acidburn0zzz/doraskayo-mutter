@@ -89,6 +89,7 @@ struct _MetaOutputInfo
   gboolean     is_primary;
   gboolean     is_presentation;
   gboolean     is_underscanning;
+  gboolean     vrr_enabled;
 };
 
 #define META_TYPE_MONITOR_MANAGER            (meta_monitor_manager_get_type ())

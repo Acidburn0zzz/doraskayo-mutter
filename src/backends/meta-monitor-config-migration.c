@@ -74,6 +74,7 @@ typedef struct
   gboolean is_primary;
   gboolean is_presentation;
   gboolean is_underscanning;
+  gboolean vrr_enabled;
 } MetaOutputConfig;
 
 typedef struct _MetaLegacyMonitorsConfig
@@ -605,6 +606,8 @@ handle_text (GMarkupParseContext *context,
           parser->output.is_presentation = read_bool (text, text_len, error);
         else if (strcmp (parser->output_field, "underscanning") == 0)
           parser->output.is_underscanning = read_bool (text, text_len, error);
+        else if (strcmp (parser->output_field, "enable_vrr") == 0)
+          parser->output.vrr_enabled = read_bool (text, text_len, error);
         else
           g_assert_not_reached ();
         return;
@@ -697,7 +700,8 @@ create_monitor_config (MetaOutputKey    *output_key,
   *monitor_config = (MetaMonitorConfig) {
     .monitor_spec = monitor_spec,
     .mode_spec = mode_spec,
-    .enable_underscanning = output_config->is_underscanning
+    .enable_underscanning = output_config->is_underscanning,
+    .enable_vrr = output_config->vrr_enabled
   };
 
   if (!meta_verify_monitor_config (monitor_config, error))

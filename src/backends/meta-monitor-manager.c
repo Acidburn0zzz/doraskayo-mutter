@@ -1392,6 +1392,15 @@ meta_monitor_manager_handle_get_current_state (MetaDBusDisplayConfig *skeleton,
                                  g_variant_new_boolean (is_underscanning));
         }
 
+      if (meta_monitor_is_vrr_capable (monitor))
+        {
+          gboolean vrr_enabled = meta_monitor_is_vrr_enabled (monitor);
+
+          g_variant_builder_add (&monitor_properties_builder, "{sv}",
+                                 "vrr-enabled",
+                                 g_variant_new_boolean (vrr_enabled));
+        }
+
       is_builtin = meta_monitor_is_laptop_panel (monitor);
       g_variant_builder_add (&monitor_properties_builder, "{sv}",
                              "is-builtin",
@@ -1661,6 +1670,8 @@ create_monitor_config_from_variant (MetaMonitorManager *manager,
   g_autoptr (GVariant) properties_variant = NULL;
   gboolean enable_underscanning = FALSE;
   gboolean set_underscanning = FALSE;
+  gboolean enable_vrr = FALSE;
+  gboolean set_enable_vrr = FALSE;
 
   g_variant_get (monitor_config_variant, "(ss@a{sv})",
                  &connector,
@@ -1696,6 +1707,19 @@ create_monitor_config_from_variant (MetaMonitorManager *manager,
         }
     }
 
+  set_enable_vrr =
+    g_variant_lookup (properties_variant, "enable_vrr", "b",
+                      &enable_vrr);
+  if (set_enable_vrr)
+    {
+      if (enable_vrr && !meta_monitor_is_vrr_capable (monitor))
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                       "Variable refresh rate requested but unsupported");
+	  return NULL;
+        }
+    }
+
   monitor_spec = meta_monitor_spec_clone (meta_monitor_get_spec (monitor));
 
   monitor_mode_spec = g_new0 (MetaMonitorModeSpec, 1);
@@ -1705,7 +1729,8 @@ create_monitor_config_from_variant (MetaMonitorManager *manager,
   *monitor_config = (MetaMonitorConfig) {
     .monitor_spec = monitor_spec,
     .mode_spec = monitor_mode_spec,
-    .enable_underscanning = enable_underscanning
+    .enable_underscanning = enable_underscanning,
+    .enable_vrr = enable_vrr
   };
 
   return monitor_config;

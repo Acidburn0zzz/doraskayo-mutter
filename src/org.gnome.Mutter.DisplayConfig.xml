@@ -321,6 +321,10 @@
 	    - "is-underscanning" (b): whether underscanning is enabled
 				      (absence of this means underscanning
 				      not being supported)
+	    - "vrr-enabled" (b): whether variable refresh rate is enabled
+	                         (absence of this means variable refresh
+	                         rate not being supported)
+
 	    - "max-screen-size" (ii): the maximum size a screen may have
 				      (absence of this means unlimited screen
 				      size)
@@ -433,6 +437,9 @@
 	        - "enable_underscanning" (b): enable monitor underscanning;
 					      may only be set when underscanning
 					      is supported (see GetCurrentState).
+	        - "enable_vrr" (b): enable variable refresh rate; may only be set
+	                            when variable refresh rate is supported (see
+	                            GetCurrentState).
 
 	@properties may effect the global monitor configuration state. Possible
 	properties are:
