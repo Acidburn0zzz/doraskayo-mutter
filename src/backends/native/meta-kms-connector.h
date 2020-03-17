@@ -57,6 +57,8 @@ typedef struct _MetaKmsConnectorState
   gboolean hotplug_mode_update;
 
   MetaMonitorTransform panel_orientation_transform;
+
+  gboolean vrr_capable;
 } MetaKmsConnectorState;
 
 MetaKmsDevice * meta_kms_connector_get_device (MetaKmsConnector *connector);
