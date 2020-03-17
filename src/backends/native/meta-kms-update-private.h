@@ -66,6 +66,14 @@ typedef struct _MetaKmsModeSet
   drmModeModeInfo *drm_mode;
 } MetaKmsModeSet;
 
+typedef struct _MetaKmsCrtcProperty
+{
+  MetaKmsDevice *device;
+  MetaKmsCrtc *crtc;
+  uint32_t prop_id;
+  uint64_t value;
+} MetaKmsCrtcProperty;
+
 typedef struct _MetaKmsConnectorProperty
 {
   MetaKmsDevice *device;
@@ -112,6 +120,11 @@ void meta_kms_update_set_connector_property (MetaKmsUpdate    *update,
                                              uint32_t          prop_id,
                                              uint64_t          value);
 
+void meta_kms_update_set_crtc_property (MetaKmsUpdate *update,
+                                        MetaKmsCrtc   *crtc,
+                                        uint32_t       prop_id,
+                                        uint64_t       value);
+
 void meta_kms_update_set_crtc_gamma (MetaKmsUpdate  *update,
                                      MetaKmsCrtc    *crtc,
                                      int             size,
@@ -133,6 +146,8 @@ GList * meta_kms_update_get_mode_sets (MetaKmsUpdate *update);
 GList * meta_kms_update_get_page_flips (MetaKmsUpdate *update);
 
 GList * meta_kms_update_get_connector_properties (MetaKmsUpdate *update);
+
+GList * meta_kms_update_get_crtc_properties (MetaKmsUpdate *update);
 
 GList * meta_kms_update_get_crtc_gammas (MetaKmsUpdate *update);
 

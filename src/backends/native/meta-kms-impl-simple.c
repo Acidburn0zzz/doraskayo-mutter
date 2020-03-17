@@ -106,6 +106,39 @@ process_connector_property (MetaKmsImpl    *impl,
 }
 
 static gboolean
+process_crtc_property (MetaKmsImpl   *impl,
+                       MetaKmsUpdate *update,
+                       gpointer       update_entry,
+                       GError       **error)
+{
+  MetaKmsCrtcProperty *crtc_property = update_entry;
+  MetaKmsCrtc *crtc = crtc_property->crtc;
+  MetaKmsDevice *device = meta_kms_crtc_get_device (crtc);
+  MetaKmsImplDevice *impl_device = meta_kms_device_get_impl_device (device);
+  int fd;
+  int ret;
+
+  fd = meta_kms_impl_device_get_fd (impl_device);
+
+  ret = drmModeObjectSetProperty (fd,
+                                  meta_kms_crtc_get_id (crtc),
+                                  DRM_MODE_OBJECT_CRTC,
+                                  crtc_property->prop_id,
+                                  crtc_property->value);
+  if (ret != 0)
+    {
+      g_set_error (error, G_IO_ERROR, g_io_error_from_errno (-ret),
+                   "Failed to set crtc %u property %u: %s",
+                   meta_kms_crtc_get_id (crtc),
+                   crtc_property->prop_id,
+                   g_strerror (-ret));
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+static gboolean
 process_plane_property (MetaKmsImpl      *impl,
                         MetaKmsPlane     *plane,
                         MetaKmsProperty  *prop,
@@ -926,6 +959,13 @@ meta_kms_impl_simple_process_update (MetaKmsImpl   *impl,
                         update,
                         meta_kms_update_get_connector_properties (update),
                         process_connector_property,
+                        &error))
+    goto err_planes_not_assigned;
+
+  if (!process_entries (impl,
+                        update,
+                        meta_kms_update_get_crtc_properties (update),
+                        process_crtc_property,
                         &error))
     goto err_planes_not_assigned;
 
