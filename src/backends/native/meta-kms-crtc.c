@@ -36,6 +36,8 @@ struct _MetaKmsCrtc
   int idx;
 
   MetaKmsCrtcState current_state;
+
+  gboolean vrr_enabled_prop_id;
 };
 
 G_DEFINE_TYPE (MetaKmsCrtc, meta_kms_crtc, G_TYPE_OBJECT)
@@ -49,6 +51,17 @@ meta_kms_crtc_set_gamma (MetaKmsCrtc    *crtc,
                          const uint16_t *blue)
 {
   meta_kms_update_set_crtc_gamma (update, crtc, size, red, green, blue);
+}
+
+void
+meta_kms_crtc_set_vrr_mode (MetaKmsCrtc   *crtc,
+                            MetaKmsUpdate *update,
+                            gboolean       enable)
+{
+  meta_kms_update_set_crtc_property(update,
+                                    crtc,
+                                    crtc->vrr_enabled_prop_id,
+                                    enable);
 }
 
 MetaKmsDevice *
@@ -243,6 +256,39 @@ meta_kms_crtc_predict_state (MetaKmsCrtc   *crtc,
     }
 }
 
+static void
+find_property_ids (MetaKmsCrtc       *crtc,
+                   MetaKmsImplDevice *impl_device,
+                   drmModeCrtc       *drm_crtc)
+{
+  drmModeObjectProperties *props;
+  int fd;
+  int i;
+
+  fd = meta_kms_impl_device_get_fd (impl_device);
+
+  props = drmModeObjectGetProperties(fd,
+                                     drm_crtc->crtc_id,
+                                     DRM_MODE_OBJECT_CRTC);
+  if (!props)
+    return;
+
+  for (i = 0; i < props->count_props; i++)
+    {
+      drmModePropertyPtr prop;
+
+      prop = drmModeGetProperty (fd, props->props[i]);
+      if (!prop)
+        continue;
+
+      if ((prop->flags & DRM_MODE_PROP_RANGE) &&
+          strcmp (prop->name, "VRR_ENABLED") == 0)
+        crtc->vrr_enabled_prop_id = prop->prop_id;
+
+      drmModeFreeProperty (prop);
+    }
+}
+
 MetaKmsCrtc *
 meta_kms_crtc_new (MetaKmsImplDevice *impl_device,
                    drmModeCrtc       *drm_crtc,
@@ -254,6 +300,8 @@ meta_kms_crtc_new (MetaKmsImplDevice *impl_device,
   crtc->device = meta_kms_impl_device_get_device (impl_device);
   crtc->id = drm_crtc->crtc_id;
   crtc->idx = idx;
+
+  find_property_ids (crtc, impl_device, drm_crtc);
 
   return crtc;
 }

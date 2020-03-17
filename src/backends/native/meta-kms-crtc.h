@@ -47,6 +47,10 @@ G_DECLARE_FINAL_TYPE (MetaKmsCrtc, meta_kms_crtc,
                       META, KMS_CRTC,
                       GObject)
 
+void meta_kms_crtc_set_vrr_mode (MetaKmsCrtc   *crtc,
+                                 MetaKmsUpdate *update,
+                                 gboolean       enable);
+
 void meta_kms_crtc_set_gamma (MetaKmsCrtc    *crtc,
                               MetaKmsUpdate  *update,
                               int             size,
