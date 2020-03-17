@@ -3033,6 +3033,30 @@ meta_window_is_on_primary_monitor (MetaWindow *window)
   return window->monitor->is_primary;
 }
 
+/**
+ * meta_window_set_vrr_requested:
+ * @window: a #MetaWindow
+ * @vrr_requested: whether the window requests variable refresh rate
+ */
+void
+meta_window_set_vrr_requested (MetaWindow *window,
+                               gboolean    vrr_requested)
+{
+  window->vrr_requested = vrr_requested;
+}
+
+/**
+ * meta_window_vrr_requested:
+ * @window: a #MetaWindow
+ *
+ * Return value: %TRUE if the window requested variable refresh rate
+ */
+gboolean
+meta_window_vrr_requested (MetaWindow *window)
+{
+  return window->vrr_requested;
+}
+
 static void
 meta_window_get_tile_fraction (MetaWindow   *window,
                                MetaTileMode  tile_mode,
