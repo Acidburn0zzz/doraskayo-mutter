@@ -91,6 +91,24 @@ meta_output_kms_set_underscan (MetaOutput    *output,
     }
 }
 
+void
+meta_output_kms_set_vrr_mode (MetaOutput    *output,
+                              MetaKmsUpdate *kms_update)
+{
+  MetaCrtc *crtc;
+  MetaKmsCrtc *kms_crtc;
+
+  if (!output->vrr_capable)
+    return;
+
+  crtc = meta_output_get_assigned_crtc (output);
+  kms_crtc = meta_crtc_kms_get_kms_crtc (crtc);
+
+  meta_kms_crtc_set_vrr_mode (kms_crtc,
+                              kms_update,
+                              output->vrr_enabled && output->vrr_requested);
+}
+
 uint32_t
 meta_output_kms_get_connector_id (MetaOutput *output)
 {
@@ -388,6 +406,8 @@ meta_create_kms_output (MetaGpuKms        *gpu_kms,
   output->hotplug_mode_update = connector_state->hotplug_mode_update;
   output->supports_underscanning =
     meta_kms_connector_is_underscanning_supported (kms_connector);
+
+  output->vrr_capable = connector_state->vrr_capable;
 
   meta_output_parse_edid (output, connector_state->edid_data);
 

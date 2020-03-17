@@ -102,6 +102,10 @@ struct _MetaOutput
   gboolean is_underscanning;
   gboolean supports_underscanning;
 
+  gboolean vrr_enabled;
+  gboolean vrr_capable;
+  gboolean vrr_requested;
+
   gpointer driver_private;
   GDestroyNotify driver_notify;
 

@@ -34,6 +34,9 @@ void meta_output_kms_set_power_save_mode (MetaOutput    *output,
 void meta_output_kms_set_underscan (MetaOutput    *output,
                                     MetaKmsUpdate *kms_update);
 
+void meta_output_kms_set_vrr_mode (MetaOutput    *output,
+                                   MetaKmsUpdate *kms_update);
+
 gboolean meta_output_kms_can_clone (MetaOutput *output,
                                     MetaOutput *other_output);
 
