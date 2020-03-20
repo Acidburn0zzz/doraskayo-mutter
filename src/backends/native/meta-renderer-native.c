@@ -2901,6 +2901,19 @@ _cogl_winsys_egl_vtable = {
   .context_init = meta_renderer_native_init_egl_context
 };
 
+void
+meta_renderer_native_view_queue_mode_set (MetaRendererView *view)
+{
+  ClutterStageView *stage_view = CLUTTER_STAGE_VIEW (view);
+  CoglFramebuffer *framebuffer =
+    clutter_stage_view_get_onscreen (stage_view);
+  CoglOnscreen *onscreen = COGL_ONSCREEN (framebuffer);
+  CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
+  MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
+
+  onscreen_native->pending_set_crtc = TRUE;
+}
+
 static void
 meta_renderer_native_queue_modes_reset (MetaRendererNative *renderer_native)
 {
@@ -2909,14 +2922,8 @@ meta_renderer_native_queue_modes_reset (MetaRendererNative *renderer_native)
 
   for (l = meta_renderer_get_views (renderer); l; l = l->next)
     {
-      ClutterStageView *stage_view = l->data;
-      CoglFramebuffer *framebuffer =
-        clutter_stage_view_get_onscreen (stage_view);
-      CoglOnscreen *onscreen = COGL_ONSCREEN (framebuffer);
-      CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
-      MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
-
-      onscreen_native->pending_set_crtc = TRUE;
+      MetaRendererView *view = l->data;
+      meta_renderer_native_view_queue_mode_set (view);
     }
 
   renderer_native->pending_unset_disabled_crtcs = TRUE;
