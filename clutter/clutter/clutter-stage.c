@@ -3209,7 +3209,7 @@ clutter_stage_ensure_redraw (ClutterStage *stage)
   priv = stage->priv;
 
   if (!_clutter_stage_needs_update (stage))
-    _clutter_stage_schedule_update (stage);
+    clutter_stage_skip_sync_delay (stage);
 
   priv->redraw_pending = TRUE;
 
@@ -3573,7 +3573,7 @@ _clutter_stage_queue_actor_redraw (ClutterStage                 *stage,
 
       CLUTTER_NOTE (PAINT, "First redraw request");
 
-      _clutter_stage_schedule_update (stage);
+      clutter_stage_skip_sync_delay (stage);
       priv->redraw_pending = TRUE;
 
       master_clock = _clutter_master_clock_get_default ();

@@ -834,6 +834,23 @@ cleanup:
             meta_window_actor_notify_damaged (toplevel_window_actor);
         }
     }
+
+  {
+    MetaWindow *toplevel_window = meta_wayland_surface_get_toplevel_window (surface);
+
+    if (toplevel_window)
+      {
+        MetaWindowActor *toplevel_window_actor = meta_window_actor_from_window (toplevel_window);
+
+        if (toplevel_window_actor)
+          {
+            MetaSurfaceActor *toplevel_surface_actor = meta_window_actor_get_surface (META_WINDOW_ACTOR (toplevel_window_actor));
+
+            if (toplevel_surface_actor)
+              clutter_actor_queue_redraw (CLUTTER_ACTOR (toplevel_surface_actor));
+          }
+      }
+  }
 }
 
 void
