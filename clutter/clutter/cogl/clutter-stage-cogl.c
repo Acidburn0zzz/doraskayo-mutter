@@ -173,7 +173,7 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
   int64_t max_render_time_allowed;
   int64_t next_presentation_time;
 
-  if (stage_cogl->update_time != -1)
+  if (stage_cogl->update_time != -1 && sync_delay >= 0)
     return;
 
   stage_cogl->last_sync_delay = sync_delay;
