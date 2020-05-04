@@ -975,6 +975,14 @@ clutter_stage_cogl_scanout_view (ClutterStageCogl *stage_cogl,
   cogl_onscreen_direct_scanout (onscreen, scanout);
 }
 
+static gboolean
+clutter_stage_cogl_can_redraw (ClutterStageWindow *stage_window)
+{
+  ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_window);
+
+  return stage_cogl->pending_swaps == 0;
+}
+
 static void
 clutter_stage_cogl_redraw (ClutterStageWindow *stage_window)
 {
@@ -1036,6 +1044,7 @@ clutter_stage_window_iface_init (ClutterStageWindowInterface *iface)
   iface->schedule_update = clutter_stage_cogl_schedule_update;
   iface->get_update_time = clutter_stage_cogl_get_update_time;
   iface->clear_update_time = clutter_stage_cogl_clear_update_time;
+  iface->can_redraw = clutter_stage_cogl_can_redraw;
   iface->redraw = clutter_stage_cogl_redraw;
 }
 

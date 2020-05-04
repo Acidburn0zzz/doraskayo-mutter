@@ -49,6 +49,7 @@ struct _ClutterStageWindowInterface
   gint64            (* get_update_time)         (ClutterStageWindow *stage_window);
   void              (* clear_update_time)       (ClutterStageWindow *stage_window);
 
+  gboolean          (* can_redraw)              (ClutterStageWindow *stage_window);
   void              (* redraw)                  (ClutterStageWindow *stage_window);
 
   gboolean          (* can_clip_redraws)        (ClutterStageWindow *stage_window);
@@ -86,6 +87,7 @@ void              _clutter_stage_window_clear_update_time       (ClutterStageWin
 void              _clutter_stage_window_set_accept_focus        (ClutterStageWindow *window,
                                                                  gboolean            accept_focus);
 
+gboolean          _clutter_stage_window_can_redraw              (ClutterStageWindow *window);
 void              _clutter_stage_window_redraw                  (ClutterStageWindow *window);
 
 gboolean          _clutter_stage_window_can_clip_redraws        (ClutterStageWindow *window);

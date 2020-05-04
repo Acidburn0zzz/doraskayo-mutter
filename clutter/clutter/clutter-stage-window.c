@@ -168,6 +168,20 @@ _clutter_stage_window_clear_update_time (ClutterStageWindow *window)
   iface->clear_update_time (window);
 }
 
+gboolean
+_clutter_stage_window_can_redraw (ClutterStageWindow *window)
+{
+  ClutterStageWindowInterface *iface;
+
+  g_return_val_if_fail (CLUTTER_IS_STAGE_WINDOW (window), FALSE);
+
+  iface = CLUTTER_STAGE_WINDOW_GET_IFACE (window);
+  if (iface->can_redraw)
+    return iface->can_redraw (window);
+
+  return FALSE;
+}
+
 void
 _clutter_stage_window_redraw (ClutterStageWindow *window)
 {
