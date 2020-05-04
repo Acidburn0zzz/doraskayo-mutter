@@ -210,9 +210,6 @@ meta_stage_native_get_update_time (ClutterStageWindow *stage_window)
 {
   ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_window);
 
-  if (stage_cogl->pending_swaps)
-    return -1; /* in the future, indefinite */
-
   return stage_cogl->update_time;
 }
 
