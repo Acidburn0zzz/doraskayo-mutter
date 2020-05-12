@@ -205,6 +205,17 @@ meta_stage_native_finish_frame (ClutterStageWindow *stage_window)
   meta_renderer_native_finish_frame (META_RENDERER_NATIVE (renderer));
 }
 
+static gint64
+meta_stage_native_get_update_time (ClutterStageWindow *stage_window)
+{
+  ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_window);
+
+  if (stage_cogl->pending_swaps)
+    return -1; /* in the future, indefinite */
+
+  return stage_cogl->update_time;
+}
+
 static void
 meta_stage_native_init (MetaStageNative *stage_native)
 {
@@ -227,4 +238,5 @@ clutter_stage_window_iface_init (ClutterStageWindowInterface *iface)
   iface->get_views = meta_stage_native_get_views;
   iface->get_frame_counter = meta_stage_native_get_frame_counter;
   iface->finish_frame = meta_stage_native_finish_frame;
+  iface->get_update_time = meta_stage_native_get_update_time;
 }

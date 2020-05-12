@@ -238,17 +238,6 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
     stage_cogl->update_time = stage_cogl->last_update_time + refresh_interval;
 }
 
-static gint64
-clutter_stage_cogl_get_update_time (ClutterStageWindow *stage_window)
-{
-  ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_window);
-
-  if (stage_cogl->pending_swaps)
-    return -1; /* in the future, indefinite */
-
-  return stage_cogl->update_time;
-}
-
 static void
 clutter_stage_cogl_clear_update_time (ClutterStageWindow *stage_window)
 {
@@ -1042,7 +1031,6 @@ clutter_stage_window_iface_init (ClutterStageWindowInterface *iface)
   iface->show = clutter_stage_cogl_show;
   iface->hide = clutter_stage_cogl_hide;
   iface->schedule_update = clutter_stage_cogl_schedule_update;
-  iface->get_update_time = clutter_stage_cogl_get_update_time;
   iface->clear_update_time = clutter_stage_cogl_clear_update_time;
   iface->can_redraw = clutter_stage_cogl_can_redraw;
   iface->redraw = clutter_stage_cogl_redraw;
