@@ -1516,7 +1516,7 @@ _clutter_stage_do_update (ClutterStage *stage)
 
   COGL_TRACE_END (ClutterStageRelayout);
 
-  if (!priv->redraw_pending)
+  if (!priv->redraw_pending || !_clutter_stage_window_can_redraw (priv->impl))
     return FALSE;
 
   if (stage_was_relayout)
